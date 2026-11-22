@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم</title>
+<style>
+  :root {
+    --bg-primary: #0a0610;
+    --bg-card: #140f1a;
+    --bg-input: #0f0a14;
+    --accent-red: #ff1f3d;
+    --accent-red-glow: rgba(255, 31, 61, 0.55);
+    --accent-emerald: #00ff9d;
+    --accent-emerald-glow: rgba(0, 255, 157, 0.5);
+    --accent-gold: #d4af37;
+    --gta-pink: #ff2d95;
+    --gta-purple: #8a2be2;
+    --gta-cyan: #00e5ff;
+    --text-main: #ece6f0;
+    --text-muted: #9a8fa6;
+    --border-soft: #2a1f33;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg-primary);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    padding: 20px;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(255, 45, 149, 0.15), transparent 42%),
+      radial-gradient(circle at 88% 12%, rgba(138, 43, 226, 0.13), transparent 45%),
+      radial-gradient(circle at 80% 90%, rgba(0, 229, 255, 0.10), transparent 45%);
+  }
+  h1 {
+    text-align: center; margin-bottom: 6px; font-size: 1.8rem;
+    background: linear-gradient(90deg, var(--gta-pink), var(--gta-purple), var(--gta-cyan));
+    background-size: 250% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    animation: shift 5s linear infinite;
+    filter: drop-shadow(0 0 16px rgba(255, 45, 149, 0.45));
+  }
+  @keyframes shift { 0%{background-position:0% 50%} 100%{background-position:250% 50%} }
+  .subtitle { text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; }
+
+  .tabs {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .tabs button {
+    font-family: inherit; font-size: 0.9rem; color: var(--text-main);
+    background: transparent; padding: 9px 20px;
+    border: 1px solid var(--border-soft); border-radius: 22px;
+    cursor: pointer; transition: all 0.25s;
+  }
+  .tabs button:hover { border-color: var(--gta-cyan); color: var(--gta-cyan); }
+  .tabs button.active {
+    color: #0a0610; font-weight: 700;
+    background: linear-gradient(135deg, var(--gta-pink), var(--gta-purple));
+    border-color: var(--gta-pink);
+    box-shadow: 0 0 18px rgba(255, 45, 149, 0.55);
+  }
+
+  .panel {
+    max-width: 1000px; margin: 0 auto 20px;
+    background: var(--bg-card); border: 1px solid var(--border-soft);
+    border-radius: 14px; padding: 22px;
+    box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.08);
+  }
+  .panel h2 {
+    color: var(--gta-cyan); margin-bottom: 16px; font-size: 1.1rem;
+    border-right: 3px solid var(--gta-cyan); padding-right: 10px;
+  }
+  .panel.hidden { display: none; }
+
+  label { display: block; margin: 12px 0 5px; font-size: 0.82rem; color: var(--text-muted); }
+  input, select, textarea {
+    width: 100%; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--border-soft); background: var(--bg-input);
+    color: var(--text-main); font-size: 0.9rem; font-family: inherit;
+    transition: all 0.2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--gta-cyan);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+  }
+  input[type="color"] { padding: 4px; height: 42px; cursor: pointer; }
+  input[type="checkbox"] { width: auto; accent-color: var(--accent-emerald); }
+
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  .row > div { flex: 1; min-width: 180px; }
+
+  button {
+    font-family: inherit; cursor: pointer; font-weight: 700;
+    padding: 10px 20px; border-radius: 8px; border: none;
+    transition: all 0.25s; font-size: 0.88rem;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--gta-pink), #a3005c); color: #fff; }
+  .btn-primary:hover { box-shadow: 0 0 20px rgba(255, 45, 149, 0.6); }
+  .btn-emerald { background: linear-gradient(135deg, var(--accent-emerald), #007a4a); color: #04100a; }
+  .btn-emerald:hover { box-shadow: 0 0 20px rgba(0, 255, 157, 0.6); }
+  .btn-gold { background: linear-gradient(135deg, var(--accent-gold), #8a6d1f); color: #0a0610; }
+  .btn-gold:hover { box-shadow: 0 0 20px rgba(212, 175, 55, 0.6); }
+  .btn-cyan { background: linear-gradient(135deg, var(--gta-cyan), #007a8a); color: #04101a; }
+  .btn-cyan:hover { box-shadow: 0 0 20px rgba(0, 229, 255, 0.6); }
+  .btn-del { background: #4a0010; color: #fff; border: 1px solid #8a0020; }
+  .btn-del:hover { box-shadow: 0 0 14px rgba(255, 31, 61, 0.6); }
+  .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+
+  .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .list-item {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; padding: 12px; border-bottom: 1px solid #1f1626;
+    flex-wrap: wrap; transition: background 0.2s;
+  }
+  .list-item:hover { background: rgba(255, 45, 149, 0.04); }
+  .list-item:last-child { border-bottom: none; }
+  .list-item .title { flex: 1; min-width: 160px; font-weight: 600; }
+  .list-item .badge {
+    font-size: 0.72rem; padding: 3px 9px; border-radius: 10px;
+    background: #1f1626; color: var(--text-muted);
+  }
+  .list-item.downloaded .title {
+    color: var(--accent-gold);
+    text-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+  }
+  .list-item .url { font-size: 0.72rem; color: var(--text-muted); word-break: break-all; }
+
+  .empty { text-align: center; color: var(--text-muted); padding: 30px; font-size: 0.9rem; }
+  .status {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    padding: 12px 26px; border-radius: 30px; font-weight: 700; font-size: 0.9rem;
+    z-index: 9999; opacity: 0; transition: all 0.3s; pointer-events: none;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  }
+  .status.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+  .status.ok { background: linear-gradient(135deg, var(--accent-emerald), #007a4a); color: #04100a; }
+  .status.err { background: linear-gradient(135deg, var(--accent-red), #7a0018); color: #fff; }
+
+  .hint {
+    font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; line-height: 1.7;
+    background: rgba(0, 229, 255, 0.04); padding: 10px 12px;
+    border-radius: 8px; border-right: 2px solid var(--gta-cyan);
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<h1>⚙️ لوحة التحكم</h1>
+<div class="subtitle">تحكم كامل في الموقع — الأقسام، الألعاب، والتصميم</div>
+
+<div class="tabs">
+  <button data-tab="settings" class="active">🎨 إعدادات الموقع</button>
+  <button data-tab="sections">🗂️ الأقسام</button>
+  <button data-tab="games">🎮 الألعاب</button>
+  <button data-tab="github">🔑 GitHub</button>
+</div>
+
+<!-- ===== إعدادات الموقع ===== -->
+<div class="panel" id="tab-settings">
+  <h2>🎨 إعدادات الموقع والتصميم</h2>
+  <div class="grid-2">
+    <div>
+      <label>اسم الموقع</label>
+      <input type="text" id="setSiteName" placeholder="مكتبة الألعاب">
+    </div>
+    <div>
+      <label>الوصف تحت الاسم</label>
+      <input type="text" id="setSiteSubtitle" placeholder="اختر قسمًا لعرض ألعابه">
+    </div>
+  </div>
+  <label>نوع الخط (CSS font-family)</label>
+  <input type="text" id="setFontFamily" placeholder="'Segoe UI', Tahoma, sans-serif">
+  <label>حجم الخط الأساسي (px)</label>
+  <input type="number" id="setFontSize" min="12" max="24" placeholder="16">
+
+  <div class="grid-2">
+    <div>
+      <label>الأحمر الأساسي</label>
+      <input type="color" id="setAccentRed">
+    </div>
+    <div>
+      <label>الزمردي</label>
+      <input type="color" id="setAccentEmerald">
+    </div>
+    <div>
+      <label>الذهبي</label>
+      <input type="color" id="setAccentGold">
+    </div>
+    <div>
+      <label>وردي GTA</label>
+      <input type="color" id="setGtaPink">
+    </div>
+    <div>
+      <label>بنفسجي GTA</label>
+      <input type="color" id="setGtaPurple">
+    </div>
+    <div>
+      <label>سماوي GTA</label>
+      <input type="color" id="setGtaCyan">
+    </div>
+  </div>
+
+  <button class="btn-cyan" style="margin-top:16px" onclick="saveSettings()">💾 حفظ الإعدادات</button>
+  <div class="hint">هذه الإعدادات تُحفظ في games.json وتُطبَّق تلقائيًا على الموقع الرئيسي (بعد إعادة النشر بدقيقة تقريبًا).</div>
+</div>
+
+<!-- ===== الأقسام ===== -->
+<div class="panel hidden" id="tab-sections">
+  <h2>🗂️ إدارة الأقسام</h2>
+  <div class="row">
+    <div style="flex:2">
+      <label>اسم قسم جديد</label>
+      <input type="text" id="newSectionName" placeholder="مثال: مغامرات">
+    </div>
+    <button class="btn-emerald" onclick="addSection()">➕ إضافة قسم</button>
+  </div>
+  <div id="sectionsList" style="margin-top:16px;"></div>
+  <div class="hint">يمكنك إعادة تسمية أي قسم — الألعاب داخله تنتقل تلقائيًا للاسم الجديد. حذف قسم لا يحذف ألعابه، لكنها تبقى بدون قسم ظاهر.</div>
+</div>
+
+<!-- ===== الألعاب ===== -->
+<div class="panel hidden" id="tab-games">
+  <h2>➕ إضافة لعبة جديدة</h2>
+  <div class="grid-2">
+    <div>
+      <label>اسم اللعبة</label>
+      <input type="text" id="newTitle" placeholder="Shadow of the Tomb Raider">
+    </div>
+    <div>
+      <label>الرابط</label>
+      <input type="text" id="newUrl" placeholder="https://...">
+    </div>
+  </div>
+  <label>القسم</label>
+  <select id="newSection"></select>
+  <label style="display:flex;align-items:center;gap:8px;margin-top:12px">
+    <input type="checkbox" id="newDownloaded"> محمّلة بالفعل
+  </label>
+  <button class="btn-primary" style="margin-top:14px" onclick="addGame()">➕ إضافة اللعبة</button>
+
+  <hr style="border:none;border-top:1px solid var(--border-soft);margin:26px 0">
+
+  <h2>🎮 الألعاب الحالية (<span id="gamesCount">0</span>)</h2>
+  <div class="row" style="margin-bottom:14px">
+    <div style="flex:1">
+      <label>فلترة بالقسم</label>
+      <select id="filterSection" onchange="renderGames()">
+        <option value="">كل الأقسام</option>
+      </select>
+    </div>
+    <div style="flex:2">
+      <label>بحث بالاسم</label>
+      <input type="text" id="searchGames" placeholder="اكتب اسم اللعبة..." oninput="renderGames()">
+    </div>
+  </div>
+  <div id="gamesList"></div>
+</div>
+
+<!-- ===== GitHub ===== -->
+<div class="panel hidden" id="tab-github">
+  <h2>🔑 إعدادات GitHub</h2>
+  <label>GitHub Token (صلاحية repo)</label>
+  <input type="password" id="token" placeholder="ghp_...">
+  <label>اسم المستودع</label>
+  <input type="text" id="repo" placeholder="username/repo-name">
+  <label>مسار الملف داخل المستودع</label>
+  <input type="text" id="filePath" value="data/games.json">
+  <button class="btn-cyan" style="margin-top:16px" onclick="saveConfig()">💾 حفظ الإعدادات وتحميل البيانات</button>
+  <div class="hint">
+    التوكن يُخزَّن في متصفحك فقط (localStorage). أنشئ توكن من GitHub → Settings → Developer settings → Personal access tokens → صلاحية <b>repo</b>. احمِ هذه الصفحة عبر Cloudflare Access.
+  </div>
+</div>
+
+<div class="status" id="status"></div>
+
+<script>
+/* ===== الحالة ===== */
+let config = { token: '', repo: '', filePath: 'data/games.json' };
+let data = { settings: {}, sections: [], games: [] };
+let fileSha = null;
+
+const DEFAULT_SETTINGS = {
+  siteName: 'مكتبة الألعاب',
+  siteSubtitle: 'اختر قسمًا لعرض ألعابه',
+  fontFamily: "'Segoe UI', Tahoma, sans-serif",
+  fontSize: '16',
+  accentRed: '#ff1f3d',
+  accentEmerald: '#00ff9d',
+  accentGold: '#d4af37',
+  gtaPink: '#ff2d95',
+  gtaPurple: '#8a2be2',
+  gtaCyan: '#00e5ff'
+};
+
+/* ===== أدوات ===== */
+function setStatus(msg, cls) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status show ' + (cls || 'ok');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2600);
+}
+function loadConfig() {
+  const saved = localStorage.getItem('gh_config');
+  if (saved) {
+    config = JSON.parse(saved);
+    document.getElementById('token').value = config.token || '';
+    document.getElementById('repo').value = config.repo || '';
+    document.getElementById('filePath').value = config.filePath || 'data/games.json';
+  }
+}
+function saveConfig() {
+  config = {
+    token: document.getElementById('token').value.trim(),
+    repo: document.getElementById('repo').value.trim(),
+    filePath: document.getElementById('filePath').value.trim() || 'data/games.json'
+  };
+  localStorage.setItem('gh_config', JSON.stringify(config));
+  setStatus('تم حفظ إعدادات GitHub ✓', 'ok');
+  fetchData();
+}
+
+/* ===== Tabs ===== */
+document.querySelectorAll('.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+    document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
+  });
+});
+
+/* ===== GitHub API ===== */
+async function fetchData() {
+  if (!config.token || !config.repo) {
+    setStatus('أدخل التوكن واسم المستودع أولاً.', 'err');
+    return;
+  }
+  try {
+    const res = await fetch(`https://api.github.com/repos/${config.repo}/contents/${config.filePath}`, {
+      headers: { Authorization: `token ${config.token}` }
+    });
+    if (!res.ok) throw new Error('فشل جلب الملف — تحقق من التوكن والمسار');
+    const json = await res.json();
+    fileSha = json.sha;
+    const decoded = decodeURIComponent(escape(atob(json.content.replace(/\n/g, ''))));
+    data = JSON.parse(decoded);
+    if (!data.settings) data.settings = {};
+    if (!data.sections) data.sections = [];
+    if (!data.games) data.games = [];
+    fillSettingsForm();
+    renderSections();
+    renderGames();
+    fillNewSectionSelect();
+    setStatus('تم تحميل البيانات ✓', 'ok');
+  } catch (e) {
+    setStatus('خطأ: ' + e.message, 'err');
+  }
+}
+
+async function pushData(message) {
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+  const res = await fetch(`https://api.github.com/repos/${config.repo}/contents/${config.filePath}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `token ${config.token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ message, content, sha: fileSha })
+  });
+  if (!res.ok) throw new Error('فشل الحفظ — قد يكون التوكن منتهي أو الملف تغيّر');
+  const json = await res.json();
+  fileSha = json.content.sha;
+}
+
+/* ===== الإعدادات ===== */
+function fillSettingsForm() {
+  const s = { ...DEFAULT_SETTINGS, ...(data.settings || {}) };
+  document.getElementById('setSiteName').value = s.siteName;
+  document.getElementById('setSiteSubtitle').value = s.siteSubtitle;
+  document.getElementById('setFontFamily').value = s.fontFamily;
+  document.getElementById('setFontSize').value = s.fontSize;
+  document.getElementById('setAccentRed').value = s.accentRed;
+  document.getElementById('setAccentEmerald').value = s.accentEmerald;
+  document.getElementById('setAccentGold').value = s.accentGold;
+  document.getElementById('setGtaPink').value = s.gtaPink;
+  document.getElementById('setGtaPurple').value = s.gtaPurple;
+  document.getElementById('setGtaCyan').value = s.gtaCyan;
+}
+async function saveSettings() {
+  data.settings = {
+    siteName: document.getElementById('setSiteName').value.trim() || DEFAULT_SETTINGS.siteName,
+    siteSubtitle: document.getElementById('setSiteSubtitle').value.trim() || DEFAULT_SETTINGS.siteSubtitle,
+    fontFamily: document.getElementById('setFontFamily').value.trim() || DEFAULT_SETTINGS.fontFamily,
+    fontSize: document.getElementById('setFontSize').value || DEFAULT_SETTINGS.fontSize,
+    accentRed: document.getElementById('setAccentRed').value,
+    accentEmerald: document.getElementById('setAccentEmerald').value,
+    accentGold: document.getElementById('setAccentGold').value,
+    gtaPink: document.getElementById('setGtaPink').value,
+    gtaPurple: document.getElementById('setGtaPurple').value,
+    gtaCyan: document.getElementById('setGtaCyan').value
+  };
+  try {
+    await pushData('Update site settings');
+    setStatus('تم حفظ الإعدادات ✓ (ستُطبق بعد إعادة النشر)', 'ok');
+  } catch (e) { setStatus('خطأ: ' + e.message, 'err'); }
+}
+
+/* ===== الأقسام ===== */
+function renderSections() {
+  const list = document.getElementById('sectionsList');
+  if (!data.sections.length) {
+    list.innerHTML = '<div class="empty">لا توجد أقسام.</div>';
+    return;
+  }
+  list.innerHTML = data.sections.map((s, i) => `
+    <div class="list-item">
+      <span class="title">${s}</span>
+      <span class="badge">${data.games.filter(g => g.section === s).length} لعبة</span>
+      <div class="actions">
+        <button class="btn-cyan btn-sm" onclick="editSection(${i})">✏️ تعديل</button>
+        <button class="btn-del btn-sm" onclick="deleteSection(${i})">🗑️ حذف</button>
+      </div>
+    </div>
+  `).join('');
+}
+async function addSection() {
+  const name = document.getElementById('newSectionName').value.trim();
+  if (!name) return setStatus('اكتب اسم القسم.', 'err');
+  if (data.sections.includes(name)) return setStatus('القسم موجود بالفعل.', 'err');
+  data.sections.push(name);
+  try {
+    await pushData(`Add section: ${name}`);
+    document.getElementById('newSectionName').value = '';
+    renderSections(); fillNewSectionSelect();
+    setStatus('تمت إضافة القسم ✓', 'ok');
+  } catch (e) { setStatus('خطأ: ' + e.message, 'err'); }
+}
+async function editSection(i) {
+  const oldName = data.sections[i];
+  const newName = prompt('اسم القسم الجديد:', oldName);
+  if (!newName || newName.trim() === '' || newName === oldName) return;
+  const trimmed = newName.trim();
+  if (data.sections.includes(trimmed)) return setStatus('الاسم موجود بالفعل.', 'err');
+  data.sections[i] = trimmed;
+  data.games.forEach(g => { if (g.section === oldName) g.section = trimmed; });
+  try {
+    await pushData(`Rename section: ${oldName} → ${trimmed}`);
+    renderSections(); renderGames(); fillNewSectionSelect();
+    setStatus('تم تعديل القسم ✓', 'ok');
+  } catch (e) { setStatus('خطأ: ' + e.message, 'err'); }
+}
+async function deleteSection(i) {
+  const name = data.sections[i];
+  if (!confirm(`حذف قسم "${name}"؟ الألعاب داخله ستبقى لكن بدون قسم.`)) return;
+  data.sections.splice(i, 1);
+  try {
+    await pushData(`Delete section: ${name}`);
+    renderSections(); renderGames(); fillNewSectionSelect();
+    setStatus('تم حذف القسم ✓', 'ok');
+  } catch (e) { setStatus('خطأ: ' + e.message, 'err'); }
+}
+
+/* ===== الألعاب ===== */
+function fillNewSectionSelect() {
+  const sel = document.getElementById('newSection');
+  sel.innerHTML = data.sections.map(s => `<option value="${s}">${s}</option>`).join('');
+  const filter = document.getElementById('filterSection');
+  filter.innerHTML = '<option value="">كل الأقسام</option>' +
+    data.sections.map(s => `<option value="${s}">${s}</option>`).join('');
+}
+
+function renderGames() {
+  const filter = document.getElementById('filterSection').value;
+  const q = document.getElementById('searchGames').value.trim().toLowerCase();
+  let list = data.games;
+  if (filter) list = list.filter(g => g.section === filter);
+  if (q) list = list.filter(g => g.title.toLowerCase().includes(q));
+  document.getElementById('gamesCount').textContent = data.games.length;
+
+  const container = document.getElementById('gamesList');
+  if (!list.length) {
+    container.innerHTML = '<div class="empty">لا توجد ألعاب مطابقة.</div>';
+    return;
+  }
+  container.innerHTML = list.map(g => {
+    const idx = data.games.indexOf(g);
+    return `
+      <div class="list-item ${g.downloaded ? 'downloaded' : ''}">
+        <div style="flex:1;min-width:200px">
+          <div class="title">${g.title}</div>
+          <div class="url">${g.url}</div>
+        </div>
+        <span class="badge">${g.section}</span>
+        <div class="actions">
+          <button class="btn-gold btn-sm" onclick="toggleDownloaded(${idx})">
+            ${g.downloaded ? '✓ محمّلة' : '⤓ حمّلتها'}
+          </button>
+          <button class="btn-cyan btn-sm" onclick="editGame(${idx})">✏️</button>
+          <button class="btn-del btn-sm" onclick="deleteGame(${idx})">🗑️</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function addGame() {
+  const title = document.getElementById('newTitle').value.trim();
+  const url = document.getElementById('newUrl').value.trim();
+  const section = document.getElementById('newSection').value;
+  const downloaded = document.getElementById('newDownloaded').checked;
+  if (!title || !url || !section) return setStatus('أكمل كل الحقول.', 'err');
+  data.games.push({ id: Date.now().toString(), title, url, section, downloaded });
+  try {
+    await pushData(`Add game: ${title}`);
+    document.getElementById('newTitle').value = '';
+    document.getElementById('newUrl').value = '';
+    document.getElementById('newDownloaded').checked = false;
+    renderGames(); renderSections();
+    setStatus('تمت إضافة اللعبة ✓', 'ok');
+  } catch (e) { setStatus('خطأ: ' + e.message, 'err'); }
+}
+
+async function editGame(idx) {
+  const g = data.games[idx];
+  const title = prompt('اسم اللعبة:', g.title);
+  if (title === null) return;
+  const url = prompt('الرابط:', g.url);
+  if (url === null) return;
+  const section = prompt('القسم:', g.section);
+  if (section === null) return;
+  if (!title.trim() || !url.trim() || !section.trim()) return setStatus('لا يمكن ترك الحقول فارغة.', 'err');
+  g.title = title.trim();
+  g.url = url.trim();
+  g.section = section.trim();
+  try {
+    await pushData(`Edit game: ${g.title}`);
+    renderGames(); renderSections();
+    setStatus('تم تعديل اللعبة ✓', 'ok');
+  } catch (e) { setStatus('خطأ: ' + e.message, 'err'); }
+}
+
+async function deleteGame(idx) {
+  const g = data.games[idx];
+  if (!confirm(`حذف "${g.title}"؟`)) return;
+  data.games.splice(idx, 1);
+  try {
+    await pushData(`Delete game: ${g.title}`);
+    renderGames(); renderSections();
+    setStatus('تم حذف اللعبة ✓', 'ok');
+  } catch (e) { setStatus('خطأ: ' + e.message, 'err'); }
+}
+
+async function toggleDownloaded(idx) {
+  const g = data.games[idx];
+  g.downloaded = !g.downloaded;
+  try {
+    await pushData(`Toggle downloaded: ${g.title}`);
+    renderGames();
+    setStatus(g.downloaded ? 'تم تحديدها كمحمّلة ✓' : 'تم إلغاء التحميل', 'ok');
+  } catch (e) { setStatus('خطأ: ' + e.message, 'err'); }
+}
+
+/* ===== تهيئة ===== */
+loadConfig();
+if (config.token && config.repo) fetchData();
+</script>
+</body>
+</html>
